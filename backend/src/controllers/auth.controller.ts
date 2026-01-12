@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
+import jwt from "jsonwebtoken";
 import { type Request, type Response } from "express";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -30,7 +34,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const error = err as any;
 
         if (error.code === 11000) {
-            res.status(409).json({ message: "Email already exists" });
+            return res.status(409).json({ message: "Email already exists" });
         }
     }
 }
@@ -58,15 +62,23 @@ export const loginUser = async (req: Request, res: Response) => {
         const isPasswordValid = await bcrypt.compare(body.password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json(
-                {
+             {
                     success: false,
                     message: "invalid credentials"
                 }
             )
         }
-        res.status(200).json({
+        const secretKey = process.env.JWT_SECRET_KEY as string;
+        const token = jwt.sign({
+                userId: user._id
+            },
+            secretKey,
+            { expiresIn: "1day" }
+        );
+        return res.status(200).json({
             success: true,
-            message: "login successful"
+            message: "login successful",
+            token: token
         })
     }
 
