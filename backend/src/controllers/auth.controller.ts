@@ -2,8 +2,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { type Request, type Response } from "express";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -23,7 +22,7 @@ export const registerUser = async (req: Request, res: Response) => {
             email: body.email,
             password: hashedPassword
         })
-        res.status(201).json({
+       return res.status(201).json({
             success: true,
             message: "user created successfully"
         })
@@ -73,17 +72,18 @@ export const loginUser = async (req: Request, res: Response) => {
                 userId: user._id
             },
             secretKey,
-            { expiresIn: "1day" }
+            { expiresIn: "1d" }
         );
+        res.cookie("token", token, {secure:false, httpOnly: true, sameSite: 'strict',});
+
         return res.status(200).json({
             success: true,
-            message: "login successful",
-            token: token
+            message: "login successful"
         })
     }
 
     catch (err) {
-        res.status(500).json(
+        return res.status(500).json(
             {
                 success: false,
 
