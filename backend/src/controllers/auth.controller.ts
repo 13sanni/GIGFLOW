@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { type Request, type Response } from "express";
+import type {  Request, Response } from "express";
 
 
 

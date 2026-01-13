@@ -1,4 +1,4 @@
-import { type Request,type Response } from "express";
+import type {  Request, Response } from "express";
 import Bid from "../models/bid.model.js";
 import Gig from "../models/gig.model.js";
 export const createBid =async (req:Request,res:Response) => {

@@ -1,5 +1,5 @@
-import { response, Router } from "express";
-import { type Request, type Response, type NextFunction } from "express";
+import { Router } from "express";
+import type { Request, Response } from "express";
 import { registerUser,loginUser} from "../controllers/auth.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 const router = Router();

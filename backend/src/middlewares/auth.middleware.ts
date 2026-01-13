@@ -1,4 +1,4 @@
-import { type Request,type Response,type NextFunction } from "express";
+import type {  NextFunction, Request, Response} from "express";
 
 import jwt from "jsonwebtoken";
 const authMiddleware = (req :Request, res:Response,next:NextFunction) => {

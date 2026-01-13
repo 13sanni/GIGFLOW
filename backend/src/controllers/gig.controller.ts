@@ -1,5 +1,5 @@
 import Gig from "../models/gig.model.js";
-import { type Request, type Response } from "express";
+import type {  Request, Response } from "express";
 
 export const createGig = async(req:Request,res:Response)=>{
     try{
