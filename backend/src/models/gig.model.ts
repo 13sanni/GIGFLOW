@@ -5,6 +5,8 @@ export interface Gig extends Document {
     budget: number,
     status: string,
     owner: mongoose.Schema.Types.ObjectId,
+     createdAt: Date;
+  updatedAt: Date;
 
 }
 const gigSchema = new Schema<Gig>({

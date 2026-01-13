@@ -20,13 +20,37 @@ export const createGig = async (req: Request, res: Response) => {
   });
 };
 
-// get open gigs (public)
+// get open gigs
 export const getGigs = async (req: Request, res: Response) => {
-  const gigs = await Gig.find({ status: "open" })
-    .sort({ createdAt: -1 });
+  try {
+    const limit = Number(req.query.limit) || 10;
+    const cursor = req.query.cursor as string | undefined;
 
-  return res.status(200).json({
-    success: true,
-    gigs
-  });
+    const query: any = { status: "open" };
+
+    if (cursor) {
+      query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    const gigs = await Gig.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit + 1); // fetch extra to detect hasMore
+
+    const hasMore = gigs.length > limit;
+    if (hasMore) gigs.pop();
+
+    return res.status(200).json({
+      success: true,
+      gigs,
+      nextCursor: gigs.length
+        ? gigs[gigs.length - 1]!.createdAt
+        : null,
+      hasMore
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "internal server error"
+    });
+  }
 };
