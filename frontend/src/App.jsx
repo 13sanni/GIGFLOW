@@ -1,20 +1,21 @@
-import api from "./lib/axios";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Gigs from "./pages/Gigs";
 
 function App() {
-  const testApi = async () => {
-    const res = await api.get("/gig/gigs");
-    console.log(res.data);
-  };
-
   return (
-    <div className="p-4">
-      <button
-        onClick={testApi}
-        className="bg-primary text-black px-4 py-2 rounded"
-      >
-        Test API
-      </button>
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50 text-gray-800">
+        <Routes>
+          <Route path="/" element={<Navigate to="/gigs" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/gigs" element={<Gigs />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
