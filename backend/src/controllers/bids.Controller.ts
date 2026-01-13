@@ -21,6 +21,13 @@ export const createBid = async (req: Request, res: Response) => {
                 .status(403)
                 .json({ success: false, message: "cannot bid on your own gig" });
         }
+        if (gig.status !== "open") {
+            return res.status(400).json({
+                success: false,
+                message: "bidding is closed for this gig"
+            });
+        }
+
 
         let existingBid = await Bid.findOne({ gig: gigId, freelancer: freelancerId });
         if (existingBid) {
@@ -61,9 +68,10 @@ export const getBidsForGig = async (req: Request, res: Response) => {
 }
 
 //hire bid
-let session: mongoose.ClientSession | null = null;
+
 
 export const hireBid = async (req: Request, res: Response) => {
+    let session: mongoose.ClientSession | null = null;
     try {
         session = await mongoose.startSession();
         session.startTransaction();
@@ -103,6 +111,8 @@ export const hireBid = async (req: Request, res: Response) => {
         );
         gig.status = "closed";
         await gig.save({ session });
+        await session.commitTransaction();
+        session.endSession();
         return res.status(200).json({
             success: true,
             message: "freelancer hired successfully"
