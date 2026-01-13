@@ -60,7 +60,7 @@ export const getGigs = async (req: Request, res: Response) => {
 // gig details
 export const getGigById = async (req: Request, res: Response) => {
   try {
-    const { gigId } = req.params;
+    const gigId = req.params.id;
 
     const gig = await Gig.findById(gigId);
 

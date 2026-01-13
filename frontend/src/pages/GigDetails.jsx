@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import BidForm from "../components/BidForm.jsx";
 import api from "../lib/Axios.jsx";
 
 const GigDetail = () => {
@@ -13,7 +14,7 @@ const GigDetail = () => {
   useEffect(() => {
     const fetchGig = async () => {
       try {
-        const res = await api.get(`/gig/${id}`);
+        const res = await api.get(`/gig/gigs/${id}`);
         setGig(res.data.gig);
       } catch (err) {
         if (err.response?.status === 401) {
@@ -93,7 +94,7 @@ const GigDetail = () => {
               Place your proposal for this gig
             </p>
 
-            {/* Your existing BidForm */}
+            
             <div className="mt-4">
               <BidForm gigId={gig._id} />
             </div>

@@ -6,8 +6,8 @@ import { validate } from "../middlewares/validation.middleware.js";
 
 const bidRouter = Router();
 
-bidRouter.post("/create",authMiddleware,validate(createBidSchema),createBid)
-bidRouter.get("/:gigId",authMiddleware,getBidsForGig)
+bidRouter.post("/",authMiddleware,validate(createBidSchema),createBid)
+bidRouter.get("/gig/:gigId",authMiddleware,getBidsForGig)
 bidRouter.post("/:bidId/hire",authMiddleware,hireBid)
 
 export default bidRouter
