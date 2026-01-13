@@ -4,9 +4,7 @@ import type {  Request, Response } from "express";
 export const createGig = async(req:Request,res:Response)=>{
     try{
     const gig = req.body;
-    if(!gig || !gig.title || !gig.description || !gig.budget){
-        return res.status(400).json({success:false,message:"data is missing"});
-    }
+    
     let userId = (req as any).user.userId;
     await Gig.create({
         title:gig.title,

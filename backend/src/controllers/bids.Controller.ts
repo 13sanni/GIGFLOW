@@ -7,9 +7,7 @@ import Gig from "../models/gig.model.js";
 export const createBid = async (req: Request, res: Response) => {
     try {
         const bid = req.body;
-        if (!bid || !bid.proposal || !bid.amount || !bid.gigId) {
-            return res.status(400).json({ success: false, message: "data is missing" });
-        }
+       
         const gigId = bid.gigId;
         const freelancerId = (req as any).user.userId;
         const gig = await Gig.findById(bid.gigId);

@@ -8,14 +8,7 @@ import type {  Request, Response } from "express";
 export const registerUser = async (req: Request, res: Response) => {
     try {
         const body = req.body;
-        if (!body || !body.email || !body.password || !body.name) {
-            return res.status(400).json(
-                {
-                    success: false,
-                    message: "data is missing"
-                }
-            )
-        }
+       
         const hashedPassword = await bcrypt.hash(body.password, 10);
         await User.create({
             name: body.name,
@@ -41,14 +34,7 @@ export const registerUser = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
     try {
         const body = req.body;
-        if (!body || !body.email || !body.password) {
-            return res.status(400).json(
-                {
-                    success: false,
-                    message: "data is missing"
-                }
-            )
-        }
+       
         const user = await User.findOne({ email: body.email });
         if (!user) {
             return res.status(404).json(
