@@ -76,3 +76,11 @@ export const logoutUser = async (req: Request, res: Response) => {
   });
 };
 
+export const getMe = (req: Request, res: Response) => {
+  return res.status(200).json({
+    success: true,
+    user: {
+      userId: (req as any).user.userId
+    }
+  });
+};
