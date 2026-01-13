@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Gigs from "./pages/Gigs";
 import GigDetail from "./pages/GigDetails.jsx";
 import AppLayout from "./layouts/AppLayout.jsx";
+import CreateGig from "./pages/CreateGig.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -14,6 +15,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           <Route element={<AppLayout />}>
+          <Route path="/create-gig" element={<CreateGig />} />
           <Route path="/" element={<Navigate to="/gigs" />} />
           <Route path="/gigs/:id" element={<GigDetail />} />
           <Route path="/gigs" element={<Gigs />} />
