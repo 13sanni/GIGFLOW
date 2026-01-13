@@ -23,7 +23,14 @@ const Gigs = () => {
         },
       });
 
-      setGigs((prev) => [...prev, ...res.data.gigs]);
+    setGigs(prev => {
+  const existingIds = new Set(prev.map(g => g._id));
+  const uniqueNewGigs = res.data.gigs.filter(
+    g => !existingIds.has(g._id)
+  );
+  return [...prev, ...uniqueNewGigs];
+});
+
       setCursor(res.data.nextCursor);
       setHasMore(res.data.hasMore);
     } catch (err) {

@@ -33,7 +33,8 @@ export const getGigs = async (req: Request, res: Response) => {
     }
 
     const gigs = await Gig.find(query)
-      .sort({ createdAt: -1 })
+     .sort({ createdAt: -1, _id: -1 })
+
       .limit(limit + 1); // fetch extra to detect hasMore
 
     const hasMore = gigs.length > limit;
