@@ -54,3 +54,30 @@ export const getGigs = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+// gig details
+export const getGigById = async (req: Request, res: Response) => {
+  try {
+    const { gigId } = req.params;
+
+    const gig = await Gig.findById(gigId);
+
+    if (!gig) {
+      return res.status(404).json({
+        success: false,
+        message: "gig not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      gig
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "internal server error"
+    });
+  }
+};
