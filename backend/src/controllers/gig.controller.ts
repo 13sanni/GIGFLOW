@@ -1,31 +1,32 @@
+import type { Request, Response } from "express";
 import Gig from "../models/gig.model.js";
-import type {  Request, Response } from "express";
+import { AppError } from "../utils/appError.js";
 
-export const createGig = async(req:Request,res:Response)=>{
-    try{
-    const gig = req.body;
-    
-    let userId = (req as any).user.userId;
-    await Gig.create({
-        title:gig.title,
-        description:gig.description,
-        budget:gig.budget,
-        owner:userId
-    })
-    return res.status(201).json({success:true,message:"gig created successfully",
-        owner:userId
-    });
-}catch(err){
-    return res.status(500).json({success:false,message:"internal server error"});   
-}
-}
+export const createGig = async (req: Request, res: Response) => {
+  const { title, description, budget } = req.body;
+  const userId = (req as any).user.userId;
 
-//get gigs
-export const getGigs = async(req:Request,res:Response)=>{
-    try{
-        const gigs = await Gig.find({status:"open"}).sort({createdAt:-1});
-        return res.status(200).json({success:true,gigs:gigs});
-    }catch(err){
-        return res.status(500).json({success:false,message:"internal server error"});
-    }   
-}
+  const gig = await Gig.create({
+    title,
+    description,
+    budget,
+    owner: userId
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: "gig created successfully",
+    gig
+  });
+};
+
+// get open gigs (public)
+export const getGigs = async (req: Request, res: Response) => {
+  const gigs = await Gig.find({ status: "open" })
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json({
+    success: true,
+    gigs
+  });
+};

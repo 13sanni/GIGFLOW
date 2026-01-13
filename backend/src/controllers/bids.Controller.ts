@@ -1,129 +1,131 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
+
 import Bid from "../models/bid.model.js";
 import Gig from "../models/gig.model.js";
+import { AppError } from "../utils/appError.js";
 
-//create bid
+
+   //CREATE BID
+
 export const createBid = async (req: Request, res: Response) => {
-    try {
-        const bid = req.body;
-       
-        const gigId = bid.gigId;
-        const freelancerId = (req as any).user.userId;
-        const gig = await Gig.findById(bid.gigId);
-        if (!gig) {
-            return res.status(404).json({ success: false, message: "gig not found" });
-        }
-        if (gig.owner.toString() === freelancerId) {
-            return res
-                .status(403)
-                .json({ success: false, message: "cannot bid on your own gig" });
-        }
-        if (gig.status !== "open") {
-            return res.status(400).json({
-                success: false,
-                message: "bidding is closed for this gig"
-            });
-        }
+  const { gigId, amount, proposal } = req.body;
+  const freelancerId = (req as any).user.userId;
 
+  const gig = await Gig.findById(gigId);
+  if (!gig) {
+    throw new AppError("gig not found", 404);
+  }
 
-        let existingBid = await Bid.findOne({ gig: gigId, freelancer: freelancerId });
-        if (existingBid) {
-            return res.status(409).json({ success: false, message: "bid already placed" });
-        }
+  if (gig.owner.toString() === freelancerId) {
+    throw new AppError("cannot bid on your own gig", 403);
+  }
 
-        await Bid.create({
-            proposal: bid.proposal,
-            amount: bid.amount,
-            gig: bid.gigId,
-            freelancer: freelancerId
-        });
-        return res.status(201).json({ success: true, message: "bid placed successfully" });
-    } catch (err) {
-        return res.status(500).json({ success: false, message: "internal server error" });
+  if (gig.status !== "open") {
+    throw new AppError("bidding is closed for this gig", 400);
+  }
 
+  const existingBid = await Bid.findOne({ gig: gigId, freelancer: freelancerId });
+  if (existingBid) {
+    throw new AppError("bid already placed", 409);
+  }
 
-    }
+  await Bid.create({
+    proposal,
+    amount,
+    gig: gigId,
+    freelancer: freelancerId
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: "bid placed successfully"
+  });
 };
 
 
-//get bids for gig
+  // GET BIDS FOR GIG (OWNER)
+
 export const getBidsForGig = async (req: Request, res: Response) => {
-    try {
-        const gigId = req.params.gigId;
-        const gig = await Gig.findById(gigId);
-        if (!gig) {
-            return res.status(404).json({ success: false, message: "gig not found" });
-        }
-        if (gig.owner.toString() !== (req as any).user.userId) {
-            return res.status(403).json({ success: false, message: "unauthorized access to bids" });
-        }
-        let bids = await Bid.find({ gig: gigId as any });
-        return res.status(200).json({ success: true, bids });
-    } catch (err) {
-        return res.status(500).json({ success: false, message: "internal server error" });
-    }
-}
+  const gigId = req.params.gigId;
+  const userId = (req as any).user.userId;
 
-//hire bid
+  const gig = await Gig.findById(gigId);
+  if (!gig) {
+    throw new AppError("gig not found", 404);
+  }
 
+  if (gig.owner.toString() !== userId) {
+    throw new AppError("unauthorized access to bids", 403);
+  }
+
+  const bids = await Bid.find({ gig: gigId as any });
+
+  return res.status(200).json({
+    success: true,
+    bids
+  });
+};
+
+
+   //HIRE BID (TRANSACTION)
 
 export const hireBid = async (req: Request, res: Response) => {
-    let session: mongoose.ClientSession | null = null;
-    try {
-        session = await mongoose.startSession();
-        session.startTransaction();
-        const { bidId } = req.params;
-        const userId = (req as any).user.userId;
-        const bid = await Bid.findById(bidId).session(session);
-        if (!bid) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(404).json({ success: false, message: "bid not found" });
-        }
-        const gig = await Gig.findById(bid.gig).session(session);
-        if (!gig) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(404).json({ success: false, message: "gig not found" });
-        }
-        if (gig.owner.toString() !== userId) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(403).json({ success: false, message: "not authorized to hire" });
-        }
+  let session: mongoose.ClientSession | null = null;
 
-        if (gig.status !== "open") {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(400).json({ success: false, message: "gig already closed" });
-        } bid.status = "accepted";
-        await bid.save({ session });
-        await Bid.updateMany(
-            {
-                gig: bid.gig,
-                _id: { $ne: bid._id }
-            },
-            { status: "rejected" },
-            { session }
-        );
-        gig.status = "closed";
-        await gig.save({ session });
-        await session.commitTransaction();
-        session.endSession();
-        return res.status(200).json({
-            success: true,
-            message: "freelancer hired successfully"
-        })
-    } catch (err) {
-        if (session) {
-            await session.abortTransaction();
-            session.endSession();
-        }
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
-        return res.status(500).json({
-            success: false,
-            message: "internal server error"
-        });
+    const { bidId } = req.params;
+    const userId = (req as any).user.userId;
+
+    const bid = await Bid.findById(bidId).session(session);
+    if (!bid) {
+      throw new AppError("bid not found", 404);
     }
-}
+
+    const gig = await Gig.findById(bid.gig).session(session);
+    if (!gig) {
+      throw new AppError("gig not found", 404);
+    }
+
+    if (gig.owner.toString() !== userId) {
+      throw new AppError("not authorized to hire", 403);
+    }
+
+    if (gig.status !== "open") {
+      throw new AppError("gig already closed", 400);
+    }
+
+    // Accept selected bid
+    bid.status = "accepted";
+    await bid.save({ session });
+
+    // Reject all other bids
+    await Bid.updateMany(
+      { gig: bid.gig, _id: { $ne: bid._id } },
+      { status: "rejected" },
+      { session }
+    );
+
+    // Close gig
+    gig.status = "closed";
+    await gig.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      success: true,
+      message: "freelancer hired successfully"
+    });
+
+  } catch (err) {
+    if (session) {
+      await session.abortTransaction();
+      session.endSession();
+    }
+    throw err; 
+  }
+};
