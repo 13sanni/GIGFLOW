@@ -1,9 +1,19 @@
+import api from "./lib/axios";
+
 function App() {
+  const testApi = async () => {
+    const res = await api.get("/gig/gigs");
+    console.log(res.data);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <h1 className="text-2xl font-semibold text-center pt-10">
-        GigFlow Frontend Ready
-      </h1>
+    <div className="p-4">
+      <button
+        onClick={testApi}
+        className="bg-primary text-black px-4 py-2 rounded"
+      >
+        Test API
+      </button>
     </div>
   );
 }
