@@ -7,7 +7,7 @@ export interface Gig extends Document {
     owner: mongoose.Schema.Types.ObjectId,
 
 }
-const gigSchema = new Schema<gig>({
+const gigSchema = new Schema<Gig>({
     title: { type: String, required: true },
     description: { type: String, required: true },
     budget: { type: Number, required: true },
