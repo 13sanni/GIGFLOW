@@ -9,7 +9,7 @@ export const createBid =async (req:Request,res:Response) => {
         }   
         const gigId = bid.gigId;
         const freelancerId = (req as any).user.userId;
-        const gig = await Gig.findById(bid.gigId);
+        const gig  = await Gig.findById(bid.gigId);
         if(!gig){
             return res.status(404).json({success:false,message:"gig not found"});
         }
@@ -37,3 +37,19 @@ export const createBid =async (req:Request,res:Response) => {
 
     }
 };
+
+export const getBidsForGig = async (req: Request, res: Response) => {
+    try {
+        const gigId = req.params.gigId;
+        const gig = await Gig.findById(gigId);
+        if (!gig) {
+            return res.status(404).json({ success: false, message: "gig not found" });
+        }
+        if (gig.owner.toString() !== (req as any).user.userId) {
+            return res.status(403).json({ success: false, message: "unauthorized access to bids" });
+        }
+       let bids = await Bid.find({ gig: gigId as any});
+        return res.status(200).json({ success: true, bids });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "internal server error" });
+    }}
