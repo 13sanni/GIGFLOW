@@ -4,18 +4,24 @@ import app from "./app.js";
 import { initSocket } from "./socket/index.js";
 import connectDB from "./config/db.js";
 import { setIO } from "./socket/socketStore.js";
-
 const server = http.createServer(app);
+
 const io = new Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL||"http://localhost:5173",
-        credentials: true,
-    },
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://gigflow-beta-ruby.vercel.app",
+    ],
+    credentials: true,
+  },
 });
+
 setIO(io);
 initSocket(io);
 
-server.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
+
 connectDB();

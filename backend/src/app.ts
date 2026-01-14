@@ -8,15 +8,34 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 const app = express();
-app.use(express.json())
+app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin:process.env.CLIENT_URL||"http://localhost:5173",
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gigflow-beta-ruby.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-}));
-app.use("/api/auth",router)
-app.use("/api/gig",gigRouter)
-app.use("/api/bid",bidRouter)
+  })
+);
+
+// IMPORTANT
+app.options("*", cors());
+
+app.use("/api/auth", router);
+app.use("/api/gig", gigRouter);
+app.use("/api/bid", bidRouter);
 
 app.use(errorHandler);
-export default app
+export default app;
