@@ -30,9 +30,6 @@ app.use(
   })
 );
 
-// IMPORTANT
-app.options("*", cors());
-
 app.use("/api/auth", router);
 app.use("/api/gig", gigRouter);
 app.use("/api/bid", bidRouter);
