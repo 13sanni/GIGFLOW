@@ -1,24 +1,34 @@
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import Navbar from "../components/Navbar";
 import socket from "../socket/Socket.jsx";
+import { addNotification } from "../store/NotificationsSlice.jsx";
 
 const AppLayout = () => {
+  const dispatch = useDispatch();
+
   useEffect(() => {
     socket.connect();
 
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-    });
-
     socket.on("bid:new", (data) => {
-      console.log("New bid received:", data);
-      alert("New bid received on your gig!");
+      dispatch(
+        addNotification({
+          type: "bid:new",
+          message: "New bid received on your gig",
+          gigId: data.gigId,
+        })
+      );
     });
 
     socket.on("bid:accepted", (data) => {
-      console.log("Bid accepted:", data);
-      alert("You have been hired!");
+      dispatch(
+        addNotification({
+          type: "bid:accepted",
+          message: "You have been hired",
+          gigId: data.gigId,
+        })
+      );
     });
 
     return () => {
@@ -26,7 +36,7 @@ const AppLayout = () => {
       socket.off("bid:accepted");
       socket.disconnect();
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
