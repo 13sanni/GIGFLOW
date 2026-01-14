@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { Request, Response } from "express";
+
 import { registerUser,loginUser, getMe} from "../controllers/auth.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { authSchema } from "../schemas/auth.schema.js";
