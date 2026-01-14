@@ -8,7 +8,7 @@ const gigRouter = Router();
 
 gigRouter.post("/create",authMiddleware,validate(createGigSchema),createGig);
 gigRouter.get("/gigs",authMiddleware,getGigs);
-gigRouter.get("/gigs/:id",authMiddleware,getGigById);
+gigRouter.get("/:id",authMiddleware,getGigById);
 
 
 export default gigRouter;

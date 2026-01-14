@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
+import { getIO } from "../socket/socketStore.js";
 
 import Bid from "../models/bid.model.js";
 import Gig from "../models/gig.model.js";
 import { AppError } from "../utils/appError.js";
 
 
-   //CREATE BID
+//CREATE BID
 
 export const createBid = async (req: Request, res: Response) => {
   const { gigId, amount, proposal } = req.body;
@@ -36,6 +37,12 @@ export const createBid = async (req: Request, res: Response) => {
     gig: gigId,
     freelancer: freelancerId
   });
+  const io = getIO();
+
+  io.to(`user:${gig.owner.toString()}`).emit("bid:new", {
+    gigId: gig._id,
+    amount: amount
+  });
 
   return res.status(201).json({
     success: true,
@@ -44,7 +51,7 @@ export const createBid = async (req: Request, res: Response) => {
 };
 
 
-  // GET BIDS FOR GIG (OWNER)
+// GET BIDS FOR GIG (OWNER)
 
 export const getBidsForGig = async (req: Request, res: Response) => {
   const gigId = req.params.gigId;
@@ -68,7 +75,7 @@ export const getBidsForGig = async (req: Request, res: Response) => {
 };
 
 
-   //HIRE BID (TRANSACTION)
+//HIRE BID (TRANSACTION)
 
 export const hireBid = async (req: Request, res: Response) => {
   let session: mongoose.ClientSession | null = null;
@@ -114,7 +121,14 @@ export const hireBid = async (req: Request, res: Response) => {
     await gig.save({ session });
 
     await session.commitTransaction();
+    const io = getIO();
+    io.to(`user:${bid.freelancer.toString()}`).emit("bid:accepted", {
+      gigId: gig._id,
+      message: "You have been hired"
+    });
+
     session.endSession();
+
 
     return res.status(200).json({
       success: true,
@@ -126,6 +140,6 @@ export const hireBid = async (req: Request, res: Response) => {
       await session.abortTransaction();
       session.endSession();
     }
-    throw err; 
+    throw err;
   }
 };

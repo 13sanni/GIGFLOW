@@ -17,7 +17,7 @@ const GigDetail = () => {
     const fetchData = async () => {
       try {
         const [gigRes, meRes] = await Promise.all([
-          api.get(`/gig/gigs/${id}`),
+          api.get(`/gig/${id}`),
           api.get("/auth/me"),
         ]);
 

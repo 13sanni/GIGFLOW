@@ -1,8 +1,21 @@
-import connectDB from "./config/db.js";
+import http from "http";
+import { Server } from "socket.io";
 import app from "./app.js";
-const port = 3000;
+import { initSocket } from "./socket/index.js";
+import connectDB from "./config/db.js";
+import { setIO } from "./socket/socketStore.js";
 
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: process.env.CLIENT_URL||"http://localhost:5173",
+        credentials: true,
+    },
+});
+setIO(io);
+initSocket(io);
+
+server.listen(3000, () => {
+    console.log("Server running on http://localhost:3000");
+});
 connectDB();
-app.listen(port, () => {
-    console.log("server is listening to port : http://localhost:3000")
-})

@@ -13,11 +13,11 @@ const BidForm = ({ gigId }) => {
     setMessage("");
 
     try {
-      await api.post("/bid", {
-        gigId,
-        proposal,
-        amount,
-      });
+    await api.post("/bid", {
+  gigId,
+  proposal: proposal.trim(),
+  amount: Number(amount),
+});
 
       setMessage("Bid placed successfully");
       setProposal("");
