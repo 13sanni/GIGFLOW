@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState, useRef } from "react";
-import api from "../lib/axios";
+import api from "../lib/Axios.jsx";
 import NotificationDropdown from "./NotificationDropDown";
 
 const Navbar = () => {
