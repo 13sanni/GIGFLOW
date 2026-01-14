@@ -6,4 +6,3 @@ export const store = configureStore({
     notifications: notificationsReducer,
   },
 });
-export default store

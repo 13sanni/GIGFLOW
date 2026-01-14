@@ -11,4 +11,4 @@ gigRouter.get("/gigs",authMiddleware,getGigs);
 gigRouter.get("/:id",authMiddleware,getGigById);
 
 
-export default gigRouter;
+export default gigRouter; 
