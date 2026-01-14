@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "../lib/Axios.JSX";
+import api from "../lib/Axios.jsx";
 
 const BidForm = ({ gigId }) => {
   const [proposal, setProposal] = useState("");
