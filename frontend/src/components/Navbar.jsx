@@ -1,11 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useRef } from "react";
 import api from "../lib/Axios.jsx";
 import NotificationDropdown from "./NotificationDropDown";
+import { clearNotifications } from "../store/NotificationsSlice.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const unreadCount = useSelector(
     (state) => state.notifications.unreadCount
   );
@@ -15,6 +17,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await api.post("/auth/logout");
+    dispatch(clearNotifications());
     navigate("/login");
   };
 
@@ -42,6 +45,20 @@ const Navbar = () => {
             className="text-gray-700 hover:text-indigo-600 transition-colors"
           >
             Create Gig
+          </Link>
+
+          <Link
+            to="/my-gigs"
+            className="text-gray-700 hover:text-indigo-600 transition-colors"
+          >
+            My Gigs
+          </Link>
+
+          <Link
+            to="/my-bids"
+            className="text-gray-700 hover:text-indigo-600 transition-colors"
+          >
+            My Bids
           </Link>
 
           <div className="relative" ref={dropdownRef}>

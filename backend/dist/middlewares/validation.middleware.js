@@ -5,10 +5,7 @@ export const validate = (schema) => (req, res, next) => {
         next();
     }
     catch (err) {
-        return res.status(400).json({
-            success: false,
-            message: err.errors?.[0]?.message || "Invalid request data"
-        });
+        next(err); // ✅ Pass to global errorHandler which handles ZodErrors
     }
 };
 //# sourceMappingURL=validation.middleware.js.map

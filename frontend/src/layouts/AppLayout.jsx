@@ -3,37 +3,34 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Navbar from "../components/Navbar";
 import socket from "../socket/Socket.jsx";
-import { addNotification } from "../store/NotificationsSlice.jsx";
+import api from "../lib/Axios.jsx";
+import {
+  addNotification,
+  setNotifications
+} from "../store/NotificationsSlice.jsx";
 
 const AppLayout = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get("/notifications");
+        dispatch(setNotifications(res.data.notifications || []));
+      } catch {
+        dispatch(setNotifications([]));
+      }
+    };
+
+    fetchNotifications();
     socket.connect();
 
-    socket.on("bid:new", (data) => {
-      dispatch(
-        addNotification({
-          type: "bid:new",
-          message: "New bid received on your gig",
-          gigId: data.gigId,
-        })
-      );
-    });
-
-    socket.on("bid:accepted", (data) => {
-      dispatch(
-        addNotification({
-          type: "bid:accepted",
-          message: "You have been hired",
-          gigId: data.gigId,
-        })
-      );
+    socket.on("notification:new", (notification) => {
+      dispatch(addNotification(notification));
     });
 
     return () => {
-      socket.off("bid:new");
-      socket.off("bid:accepted");
+      socket.off("notification:new");
       socket.disconnect();
     };
   }, [dispatch]);

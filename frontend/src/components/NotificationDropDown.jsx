@@ -1,17 +1,40 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { markAllAsRead } from "../store/NotificationsSlice.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import api from "../lib/Axios.jsx";
+import { markNotificationRead } from "../store/NotificationsSlice.jsx";
+
+const getNotificationPath = (notification) => {
+  if (!notification.gigId) {
+    return "/gigs";
+  }
+
+  if (notification.type === "BID_PLACED") {
+    return `/gig/${notification.gigId}/bids`;
+  }
+
+  return `/gig/${notification.gigId}`;
+};
 
 const NotificationDropdown = ({ onClose }) => {
   const dispatch = useDispatch();
-  const notifications = useSelector(
-    (state) => state.notifications.items
-  );
+  const navigate = useNavigate();
+  const notifications = useSelector((state) => state.notifications.items);
 
-  // Mark all as read once when dropdown opens
-  useEffect(() => {
-    dispatch(markAllAsRead());
-  }, [dispatch]);
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      try {
+        await api.patch(`/notifications/${notification.id}/read`);
+      } catch {
+        // Keep navigation usable even if read-state update fails.
+      }
+
+      dispatch(markNotificationRead(notification.id));
+    }
+
+    navigate(getNotificationPath(notification));
+    onClose?.();
+  };
 
   return (
     <div
@@ -20,7 +43,6 @@ const NotificationDropdown = ({ onClose }) => {
                  rounded-xl shadow-lg
                  max-h-96 overflow-y-auto z-50"
     >
-     
       <div className="px-4 py-3 border-b text-sm font-medium text-gray-900">
         Notifications
       </div>
@@ -30,18 +52,22 @@ const NotificationDropdown = ({ onClose }) => {
           No notifications
         </div>
       ) : (
-        notifications.map((n) => (
-          <div
-            key={n.id}
-            className="px-4 py-3 text-sm
+        notifications.map((notification) => (
+          <button
+            type="button"
+            key={notification.id}
+            onClick={() => handleNotificationClick(notification)}
+            className={`w-full text-left px-4 py-3 text-sm
                        hover:bg-gray-50 transition-colors
-                       border-b last:border-b-0"
+                       border-b last:border-b-0 ${
+                         notification.isRead ? "bg-white" : "bg-indigo-50/40"
+                       }`}
           >
-            <p className="text-gray-800">{n.message}</p>
+            <p className="text-gray-800">{notification.message}</p>
             <p className="mt-1 text-xs text-gray-500">
-              {new Date(n.createdAt).toLocaleString()}
+              {new Date(notification.createdAt).toLocaleString()}
             </p>
-          </div>
+          </button>
         ))
       )}
     </div>

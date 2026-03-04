@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
-import { getIO } from "../socket/socketStore.js";
 
 import Bid from "../models/bid.model.js";
 import Gig from "../models/gig.model.js";
+import User from "../models/user.model.js";
 import { AppError } from "../utils/appError.js";
+import { getMyBidsActivity } from "../services/activity.service.js";
+import { createAndEmitNotification } from "../services/notification.service.js";
 
 
 //CREATE BID
@@ -30,17 +32,21 @@ export const createBid = async (req: Request, res: Response) => {
     throw new AppError("bid already placed", 409);
   }
 
-  await Bid.create({
+  const bid = await Bid.create({
     proposal,
     amount,
     gig: gigId,
     freelancer: freelancerId
   });
-  const io = getIO();
+  const bidder = await User.findById(freelancerId).select("name");
 
-  io.to(`user:${gig.owner.toString()}`).emit("bid:new", {
-    gigId: gig._id,
-    amount: amount
+  await createAndEmitNotification({
+    type: "BID_PLACED",
+    gigId: gig._id.toString(),
+    bidId: bid._id.toString(),
+    senderId: freelancerId,
+    receiverId: gig.owner.toString(),
+    message: `${bidder?.name ?? "Someone"} placed a bid on your gig`
   });
 
   return res.status(201).json({
@@ -66,6 +72,16 @@ export const getBidsForGig = async (req: Request, res: Response) => {
   }
 
   const bids = await Bid.find({ gig: gigId as any });
+
+  return res.status(200).json({
+    success: true,
+    bids
+  });
+};
+
+export const getMyBids = async (req: Request, res: Response) => {
+  const userId = (req as any).user.userId;
+  const bids = await getMyBidsActivity(userId);
 
   return res.status(200).json({
     success: true,
@@ -114,10 +130,13 @@ export const hireBid = async (req: Request, res: Response) => {
   gig.status = "closed";
   await gig.save();
 
-  const io = getIO();
-  io.to(`user:${bid.freelancer.toString()}`).emit("bid:accepted", {
-    gigId: gig._id,
-    message: "You have been hired"
+  await createAndEmitNotification({
+    type: "BID_ACCEPTED",
+    gigId: gig._id.toString(),
+    bidId: bid._id.toString(),
+    senderId: userId,
+    receiverId: bid.freelancer.toString(),
+    message: `Your bid was accepted for "${gig.title}"`
   });
 
   return res.status(200).json({

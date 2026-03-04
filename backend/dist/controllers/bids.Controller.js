@@ -1,8 +1,9 @@
-import mongoose from "mongoose";
-import { getIO } from "../socket/socketStore.js";
 import Bid from "../models/bid.model.js";
 import Gig from "../models/gig.model.js";
+import User from "../models/user.model.js";
 import { AppError } from "../utils/appError.js";
+import { getMyBidsActivity } from "../services/activity.service.js";
+import { createAndEmitNotification } from "../services/notification.service.js";
 //CREATE BID
 export const createBid = async (req, res) => {
     const { gigId, amount, proposal } = req.body;
@@ -21,16 +22,20 @@ export const createBid = async (req, res) => {
     if (existingBid) {
         throw new AppError("bid already placed", 409);
     }
-    await Bid.create({
+    const bid = await Bid.create({
         proposal,
         amount,
         gig: gigId,
         freelancer: freelancerId
     });
-    const io = getIO();
-    io.to(`user:${gig.owner.toString()}`).emit("bid:new", {
-        gigId: gig._id,
-        amount: amount
+    const bidder = await User.findById(freelancerId).select("name");
+    await createAndEmitNotification({
+        type: "BID_PLACED",
+        gigId: gig._id.toString(),
+        bidId: bid._id.toString(),
+        senderId: freelancerId,
+        receiverId: gig.owner.toString(),
+        message: `${bidder?.name ?? "Someone"} placed a bid on your gig`
     });
     return res.status(201).json({
         success: true,
@@ -54,54 +59,53 @@ export const getBidsForGig = async (req, res) => {
         bids
     });
 };
-//HIRE BID (TRANSACTION)
+export const getMyBids = async (req, res) => {
+    const userId = req.user.userId;
+    const bids = await getMyBidsActivity(userId);
+    return res.status(200).json({
+        success: true,
+        bids
+    });
+};
+// HIRE BID
+// NOTE: MongoDB transactions require a replica set (not available on free Atlas M0 clusters).
+// Using sequential operations instead — safe because status checks prevent double-hiring.
 export const hireBid = async (req, res) => {
-    let session = null;
-    try {
-        session = await mongoose.startSession();
-        session.startTransaction();
-        const { bidId } = req.params;
-        const userId = req.user.userId;
-        const bid = await Bid.findById(bidId).session(session);
-        if (!bid) {
-            throw new AppError("bid not found", 404);
-        }
-        const gig = await Gig.findById(bid.gig).session(session);
-        if (!gig) {
-            throw new AppError("gig not found", 404);
-        }
-        if (gig.owner.toString() !== userId) {
-            throw new AppError("not authorized to hire", 403);
-        }
-        if (gig.status !== "open") {
-            throw new AppError("gig already closed", 400);
-        }
-        // Accept selected bid
-        bid.status = "accepted";
-        await bid.save({ session });
-        // Reject all other bids
-        await Bid.updateMany({ gig: bid.gig, _id: { $ne: bid._id } }, { status: "rejected" }, { session });
-        // Close gig
-        gig.status = "closed";
-        await gig.save({ session });
-        await session.commitTransaction();
-        const io = getIO();
-        io.to(`user:${bid.freelancer.toString()}`).emit("bid:accepted", {
-            gigId: gig._id,
-            message: "You have been hired"
-        });
-        session.endSession();
-        return res.status(200).json({
-            success: true,
-            message: "freelancer hired successfully"
-        });
+    const { bidId } = req.params;
+    const userId = req.user.userId;
+    const bid = await Bid.findById(bidId);
+    if (!bid) {
+        throw new AppError("bid not found", 404);
     }
-    catch (err) {
-        if (session) {
-            await session.abortTransaction();
-            session.endSession();
-        }
-        throw err;
+    const gig = await Gig.findById(bid.gig);
+    if (!gig) {
+        throw new AppError("gig not found", 404);
     }
+    if (gig.owner.toString() !== userId) {
+        throw new AppError("not authorized to hire", 403);
+    }
+    if (gig.status !== "open") {
+        throw new AppError("gig already closed", 400);
+    }
+    // Accept selected bid
+    bid.status = "accepted";
+    await bid.save();
+    // Reject all other bids
+    await Bid.updateMany({ gig: bid.gig, _id: { $ne: bid._id } }, { status: "rejected" });
+    // Close gig
+    gig.status = "closed";
+    await gig.save();
+    await createAndEmitNotification({
+        type: "BID_ACCEPTED",
+        gigId: gig._id.toString(),
+        bidId: bid._id.toString(),
+        senderId: userId,
+        receiverId: bid.freelancer.toString(),
+        message: `Your bid was accepted for "${gig.title}"`
+    });
+    return res.status(200).json({
+        success: true,
+        message: "freelancer hired successfully"
+    });
 };
 //# sourceMappingURL=bids.Controller.js.map

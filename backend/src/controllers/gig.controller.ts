@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import Gig from "../models/gig.model.js";
-import { AppError } from "../utils/appError.js";
+import { getMyGigsActivity } from "../services/activity.service.js";
 
 export const createGig = async (req: Request, res: Response) => {
   const { title, description, budget } = req.body;
@@ -81,4 +81,14 @@ export const getGigById = async (req: Request, res: Response) => {
       message: "internal server error"
     });
   }
+};
+
+export const getMyGigs = async (req: Request, res: Response) => {
+  const userId = (req as any).user.userId;
+  const gigs = await getMyGigsActivity(userId);
+
+  return res.status(200).json({
+    success: true,
+    gigs,
+  });
 };

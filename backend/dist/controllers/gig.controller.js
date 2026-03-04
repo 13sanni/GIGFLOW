@@ -1,5 +1,5 @@
 import Gig from "../models/gig.model.js";
-import { AppError } from "../utils/appError.js";
+import { getMyGigsActivity } from "../services/activity.service.js";
 export const createGig = async (req, res) => {
     const { title, description, budget } = req.body;
     const userId = req.user.userId;
@@ -68,5 +68,13 @@ export const getGigById = async (req, res) => {
             message: "internal server error"
         });
     }
+};
+export const getMyGigs = async (req, res) => {
+    const userId = req.user.userId;
+    const gigs = await getMyGigsActivity(userId);
+    return res.status(200).json({
+        success: true,
+        gigs,
+    });
 };
 //# sourceMappingURL=gig.controller.js.map

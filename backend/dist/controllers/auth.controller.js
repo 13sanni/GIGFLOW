@@ -4,8 +4,8 @@ import User from "../models/user.model.js";
 import { AppError } from "../utils/appError.js";
 export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
     try {
+        const hashedPassword = await bcrypt.hash(password, 10);
         await User.create({
             name,
             email,
