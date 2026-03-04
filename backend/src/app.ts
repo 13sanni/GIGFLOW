@@ -5,8 +5,6 @@ import cookieParser from "cookie-parser";
 import bidRouter from "./routes/bids.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import cors from "cors";
-import dotenv from "dotenv";
-dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
