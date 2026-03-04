@@ -1,1 +1,120 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  --bg-base: #f6fbff;
+  --bg-strong: #e6f4ff;
+  --surface: #ffffffd9;
+  --surface-solid: #ffffff;
+  --text-main: #0f172a;
+  --text-soft: #475569;
+  --line-soft: #bfdbfe;
+  --brand: #1d4ed8;
+  --brand-alt: #0284c7;
+  --success: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --shadow-soft: 0 20px 44px -28px rgba(15, 23, 42, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Sora", "Outfit", "Manrope", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 10% 12%, rgba(14, 165, 233, 0.2), transparent 35%),
+    radial-gradient(circle at 92% 84%, rgba(59, 130, 246, 0.2), transparent 34%),
+    linear-gradient(180deg, var(--bg-base), #ecf6ff 48%, #f7fbff);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Outfit", "Sora", sans-serif;
+}
+
+.app-shell {
+  position: relative;
+}
+
+.ambient-bg::before {
+  content: "";
+  position: fixed;
+  inset: -15% -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(125, 211, 252, 0.22), transparent 32%),
+    radial-gradient(circle at 78% 55%, rgba(96, 165, 250, 0.18), transparent 30%);
+  z-index: 0;
+}
+
+.surface {
+  background: var(--surface);
+  border: 1px solid rgba(191, 219, 254, 0.75);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+}
+
+.surface-solid {
+  background: var(--surface-solid);
+  border: 1px solid rgba(191, 219, 254, 0.85);
+  box-shadow: var(--shadow-soft);
+}
+
+.button-brand {
+  background: linear-gradient(135deg, var(--brand-alt), var(--brand));
+  color: #f8fafc;
+  border: 0;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.button-brand:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.brand-pill {
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: rgba(191, 219, 254, 0.32);
+  color: #1e3a8a;
+}
+
+.fade-up {
+  animation: fadeUp 0.5s ease both;
+}
+
+.stagger-1 {
+  animation-delay: 0.08s;
+}
+
+.stagger-2 {
+  animation-delay: 0.16s;
+}
+
+.stagger-3 {
+  animation-delay: 0.24s;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

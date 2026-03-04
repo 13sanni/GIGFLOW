@@ -36,11 +36,10 @@ const BidForm = ({ gigId }) => {
   return (
     <form
       onSubmit={submitBid}
-      className="mt-6 space-y-5 max-w-xl"
+      className="mt-6 space-y-5 max-w-xl fade-up"
     >
-      {/* Proposal */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
           Proposal
         </label>
         <textarea
@@ -49,20 +48,19 @@ const BidForm = ({ gigId }) => {
           placeholder="Describe how you will approach this gig…"
           required
           rows={4}
-          className="w-full rounded-lg border border-gray-300 p-3
-                     text-sm text-gray-800
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500
+          className="w-full rounded-xl border border-sky-200 bg-white/90 p-3.5
+                     text-sm text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-sky-500
                      resize-none"
         />
       </div>
 
-      {/* Amount */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
           Bid Amount
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
             ₹
           </span>
           <input
@@ -71,33 +69,27 @@ const BidForm = ({ gigId }) => {
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Enter your price"
             required
-            className="w-full rounded-lg border border-gray-300 p-3 pl-8
-                       text-sm text-gray-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-xl border border-sky-200 bg-white/90 p-3.5 pl-8
+                       text-sm text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
 
-      {/* Submit */}
       <button
         disabled={loading}
-        className="inline-flex items-center justify-center
-                   rounded-lg bg-indigo-600 px-5 py-2.5
-                   text-sm font-medium text-white
-                   hover:bg-indigo-700
-                   disabled:opacity-60 disabled:cursor-not-allowed
-                   transition-colors"
+        className="button-brand inline-flex items-center justify-center rounded-xl px-5 py-2.5
+                   text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? "Submitting…" : "Place Bid"}
       </button>
 
-      {/* Message */}
       {message && (
         <p
           className={`text-sm ${
             message.includes("success")
-              ? "text-green-600"
-              : "text-red-600"
+              ? "text-green-700"
+              : "text-red-700"
           }`}
         >
           {message}

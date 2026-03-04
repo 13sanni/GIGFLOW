@@ -8,7 +8,7 @@ import { createAndEmitNotification } from "../services/notification.service.js";
 export const createBid = async (req, res) => {
     const { gigId, amount, proposal } = req.body;
     const freelancerId = req.user.userId;
-    const gig = await Gig.findById(gigId);
+    const gig = await Gig.findById(gigId).select("_id owner status");
     if (!gig) {
         throw new AppError("gig not found", 404);
     }
@@ -18,17 +18,22 @@ export const createBid = async (req, res) => {
     if (gig.status !== "open") {
         throw new AppError("bidding is closed for this gig", 400);
     }
-    const existingBid = await Bid.findOne({ gig: gigId, freelancer: freelancerId });
-    if (existingBid) {
-        throw new AppError("bid already placed", 409);
+    let bid;
+    try {
+        bid = await Bid.create({
+            proposal,
+            amount,
+            gig: gigId,
+            freelancer: freelancerId
+        });
     }
-    const bid = await Bid.create({
-        proposal,
-        amount,
-        gig: gigId,
-        freelancer: freelancerId
-    });
-    const bidder = await User.findById(freelancerId).select("name");
+    catch (err) {
+        if (err?.code === 11000) {
+            throw new AppError("bid already placed", 409);
+        }
+        throw err;
+    }
+    const bidder = await User.findById(freelancerId).select("name").lean();
     await createAndEmitNotification({
         type: "BID_PLACED",
         gigId: gig._id.toString(),
@@ -46,14 +51,16 @@ export const createBid = async (req, res) => {
 export const getBidsForGig = async (req, res) => {
     const gigId = req.params.gigId;
     const userId = req.user.userId;
-    const gig = await Gig.findById(gigId);
+    const gig = await Gig.findById(gigId).select("owner").lean();
     if (!gig) {
         throw new AppError("gig not found", 404);
     }
     if (gig.owner.toString() !== userId) {
         throw new AppError("unauthorized access to bids", 403);
     }
-    const bids = await Bid.find({ gig: gigId });
+    const bids = await Bid.find({ gig: gigId })
+        .sort({ createdAt: -1 })
+        .lean();
     return res.status(200).json({
         success: true,
         bids
@@ -90,11 +97,12 @@ export const hireBid = async (req, res) => {
     // Accept selected bid
     bid.status = "accepted";
     await bid.save();
-    // Reject all other bids
-    await Bid.updateMany({ gig: bid.gig, _id: { $ne: bid._id } }, { status: "rejected" });
-    // Close gig
+    // Close gig and reject all remaining bids in parallel.
     gig.status = "closed";
-    await gig.save();
+    await Promise.all([
+        Bid.updateMany({ gig: bid.gig, _id: { $ne: bid._id } }, { status: "rejected" }),
+        gig.save()
+    ]);
     await createAndEmitNotification({
         type: "BID_ACCEPTED",
         gigId: gig._id.toString(),

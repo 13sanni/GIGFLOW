@@ -38,17 +38,17 @@ const NotificationDropdown = ({ onClose }) => {
 
   return (
     <div
-      className="absolute right-0 mt-2 w-80
-                 bg-white border border-gray-200
-                 rounded-xl shadow-lg
+      className="absolute right-0 mt-2 w-[21rem] max-w-[calc(100vw-1rem)]
+                 surface-solid
+                 rounded-2xl
                  max-h-96 overflow-y-auto z-50"
     >
-      <div className="px-4 py-3 border-b text-sm font-medium text-gray-900">
+      <div className="px-4 py-3 border-b border-sky-100 text-sm font-semibold text-slate-900">
         Notifications
       </div>
 
       {notifications.length === 0 ? (
-        <div className="px-4 py-6 text-sm text-gray-500 text-center">
+        <div className="px-4 py-6 text-sm text-slate-500 text-center">
           No notifications
         </div>
       ) : (
@@ -58,13 +58,13 @@ const NotificationDropdown = ({ onClose }) => {
             key={notification.id}
             onClick={() => handleNotificationClick(notification)}
             className={`w-full text-left px-4 py-3 text-sm
-                       hover:bg-gray-50 transition-colors
-                       border-b last:border-b-0 ${
-                         notification.isRead ? "bg-white" : "bg-indigo-50/40"
+                       hover:bg-sky-50 transition-colors
+                       border-b border-sky-100 last:border-b-0 ${
+                         notification.isRead ? "bg-white/70" : "bg-sky-50/70"
                        }`}
           >
-            <p className="text-gray-800">{notification.message}</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="text-slate-800">{notification.message}</p>
+            <p className="mt-1 text-xs text-slate-500">
               {new Date(notification.createdAt).toLocaleString()}
             </p>
           </button>

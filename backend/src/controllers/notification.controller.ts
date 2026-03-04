@@ -10,7 +10,8 @@ export const getMyNotifications = async (req: Request, res: Response) => {
 
   const notifications = await Notification.find({ receiverId: userId })
     .sort({ createdAt: -1 })
-    .limit(100);
+    .limit(100)
+    .lean();
 
   return res.status(200).json({
     success: true,

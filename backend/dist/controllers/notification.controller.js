@@ -6,7 +6,8 @@ export const getMyNotifications = async (req, res) => {
     const userId = req.user.userId;
     const notifications = await Notification.find({ receiverId: userId })
         .sort({ createdAt: -1 })
-        .limit(100);
+        .limit(100)
+        .lean();
     return res.status(200).json({
         success: true,
         notifications: notifications.map(mapNotificationDto),

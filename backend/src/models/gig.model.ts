@@ -13,13 +13,21 @@ const gigSchema = new Schema<Gig>({
     title: { type: String, required: true },
     description: { type: String, required: true },
     budget: { type: Number, required: true },
-    status: { type: String, required: true, default: "open" },
+    status: {
+        type: String,
+        required: true,
+        enum: ["open", "closed"],
+        default: "open"
+    },
     owner: {
         type: Schema.Types.ObjectId, ref: "User", required: true
     }
 },
     { timestamps: true }
 );
+
+gigSchema.index({ status: 1, createdAt: -1, _id: -1 });
+gigSchema.index({ owner: 1, createdAt: -1 });
 
 const Gig = mongoose.model<Gig>("Gig", gigSchema);
 export default Gig

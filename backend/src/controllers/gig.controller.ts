@@ -23,7 +23,8 @@ export const createGig = async (req: Request, res: Response) => {
 // get open gigs
 export const getGigs = async (req: Request, res: Response) => {
   try {
-    const limit = Number(req.query.limit) || 10;
+    const requestedLimit = Number(req.query.limit) || 10;
+    const limit = Math.min(Math.max(requestedLimit, 1), 50);
     const cursor = req.query.cursor as string | undefined;
 
     const query: any = { status: "open" };
@@ -33,9 +34,9 @@ export const getGigs = async (req: Request, res: Response) => {
     }
 
     const gigs = await Gig.find(query)
-     .sort({ createdAt: -1, _id: -1 })
-
-      .limit(limit + 1); // fetch extra to detect hasMore
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit + 1) // fetch extra to detect hasMore
+      .lean();
 
     const hasMore = gigs.length > limit;
     if (hasMore) gigs.pop();
@@ -62,7 +63,7 @@ export const getGigById = async (req: Request, res: Response) => {
   try {
     const gigId = req.params.id;
 
-    const gig = await Gig.findById(gigId);
+    const gig = await Gig.findById(gigId).lean();
 
     if (!gig) {
       return res.status(404).json({
