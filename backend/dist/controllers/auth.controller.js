@@ -36,9 +36,9 @@ export const loginUser = async (req, res) => {
     const secretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "1d" });
     res.cookie("token", token, {
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-        sameSite: "strict"
+        sameSite: "none"
     });
     return res.status(200).json({
         success: true,
@@ -49,7 +49,7 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production"
     });
     return res.status(200).json({
