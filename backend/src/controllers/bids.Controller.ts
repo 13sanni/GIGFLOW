@@ -7,9 +7,6 @@ import { AppError } from "../utils/appError.js";
 import { getMyBidsActivity } from "../services/activity.service.js";
 import { createAndEmitNotification } from "../services/notification.service.js";
 
-
-//CREATE BID
-
 export const createBid = async (req: Request, res: Response) => {
   const { gigId, amount, proposal } = req.body;
   const freelancerId = (req as any).user.userId;
@@ -33,7 +30,7 @@ export const createBid = async (req: Request, res: Response) => {
       proposal,
       amount,
       gig: gigId,
-      freelancer: freelancerId
+      freelancer: freelancerId,
     });
   } catch (err: any) {
     if (err?.code === 11000) {
@@ -50,17 +47,14 @@ export const createBid = async (req: Request, res: Response) => {
     bidId: bid._id.toString(),
     senderId: freelancerId,
     receiverId: gig.owner.toString(),
-    message: `${bidder?.name ?? "Someone"} placed a bid on your gig`
+    message: `${bidder?.name ?? "Someone"} placed a bid on your gig`,
   });
 
   return res.status(201).json({
     success: true,
-    message: "bid placed successfully"
+    message: "bid placed successfully",
   });
 };
-
-
-// GET BIDS FOR GIG (OWNER)
 
 export const getBidsForGig = async (req: Request, res: Response) => {
   const gigId = req.params.gigId;
@@ -81,7 +75,7 @@ export const getBidsForGig = async (req: Request, res: Response) => {
 
   return res.status(200).json({
     success: true,
-    bids
+    bids,
   });
 };
 
@@ -91,14 +85,9 @@ export const getMyBids = async (req: Request, res: Response) => {
 
   return res.status(200).json({
     success: true,
-    bids
+    bids,
   });
 };
-
-
-// HIRE BID
-// NOTE: MongoDB transactions require a replica set (not available on free Atlas M0 clusters).
-// Using sequential operations instead — safe because status checks prevent double-hiring.
 
 export const hireBid = async (req: Request, res: Response) => {
   const { bidId } = req.params;
@@ -122,18 +111,16 @@ export const hireBid = async (req: Request, res: Response) => {
     throw new AppError("gig already closed", 400);
   }
 
-  // Accept selected bid
   bid.status = "accepted";
   await bid.save();
 
-  // Close gig and reject all remaining bids in parallel.
   gig.status = "closed";
   await Promise.all([
     Bid.updateMany(
       { gig: bid.gig, _id: { $ne: bid._id } },
       { status: "rejected" }
     ),
-    gig.save()
+    gig.save(),
   ]);
 
   await createAndEmitNotification({
@@ -142,11 +129,11 @@ export const hireBid = async (req: Request, res: Response) => {
     bidId: bid._id.toString(),
     senderId: userId,
     receiverId: bid.freelancer.toString(),
-    message: `Your bid was accepted for "${gig.title}"`
+    message: `Your bid was accepted for "${gig.title}"`,
   });
 
   return res.status(200).json({
     success: true,
-    message: "freelancer hired successfully"
+    message: "freelancer hired successfully",
   });
 };

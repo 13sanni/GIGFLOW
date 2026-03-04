@@ -7,13 +7,15 @@ import notificationRouter from "./routes/notification.routes.js";
 import userRouter from "./routes/user.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import cors from "cors";
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+const clientUrl = process.env.CLIENT_URL;
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://gigflow-beta-ruby.vercel.app",
+  ...(clientUrl ? [clientUrl] : []),
 ];
 
 app.use(

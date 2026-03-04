@@ -1,163 +1,124 @@
-GigFlow – Mini Freelance Marketplace Platform
-
-GigFlow is a mini freelance marketplace platform built as part of the Full Stack Development Internship Assignment for ServiceHive.
-It allows users to post gigs, place bids, and safely hire exactly one freelancer per gig, with a strong focus on backend correctness, secure authentication, and real-world system design.
-
-🌐 Live Project Links
-
-Frontend (Vercel):
-https://gigflow-beta-ruby.vercel.app/
-
-Backend (Render):
-https://gigflow-1-mr68.onrender.com
-
-Note: Authentication uses HttpOnly cookies.
-For proper testing, use the deployed frontend or Postman with cookies enabled.
-
-🎯 Assignment Coverage
-
-This project fulfills all major assignment requirements:
-
-Secure user authentication
-
-Proper database modeling & relationships
-
-Gig and bid management
-
-Safe hiring logic (one freelancer per gig)
-
-Real-time notifications (Socket.io)
-
-Clean, modular backend structure
-
-Deployed frontend & backend
-
-🔑 Core Features
-User Authentication
-
-User registration & login
-
-JWT-based authentication using HttpOnly cookies
-
-Secure logout
-
-Protected routes via auth middleware
-
-Gig Management
-
-Authenticated users can create gigs
-
-All users can browse open gigs
-
-Gig status: open / closed
-
-Only gig owners can view bids on their gigs
-
-Bidding System
-
-Freelancers can place bids on gigs
-
-Users cannot bid on their own gigs
-
-Duplicate bids are prevented
-
-Bid statuses: pending, accepted, rejected
-
-Hiring Workflow (Atomic & Safe)
-
-A gig owner can hire only one freelancer
-
-Implemented using MongoDB transactions
-
-When a bid is accepted:
-
-All other bids are rejected automatically
-
-Gig is marked as closed
-
-Prevents race conditions and ensures data consistency
-
-Real-Time Notifications (Socket.io)
-
-Gig owners get notified when a new bid is placed
-
-Freelancers get notified when hired
-
-Authenticated socket connections using JWT
-
-Event-based notifications (no polling)
-
-State Management
-
-Redux Toolkit used only for real-time notifications
-
-Notification list
-
-Unread count
-
-REST data (gigs, bids, auth) handled via API calls
-
-🛠️ Tech Stack
-Backend
-
-Node.js
-
-Express.js
-
-TypeScript
-
-MongoDB + Mongoose
-
-JWT Authentication
-
-Socket.io
-
-Frontend
-
-React (Vite)
-
-Tailwind CSS
-
-Axios
-
-Redux Toolkit
-
-Socket.io Client
-
-Deployment
-
-Backend: Render
-
-Frontend: Vercel
-
-🧠 Technical Highlights
-
-MongoDB Transactions for safe hiring workflow
-
-JWT stored in HttpOnly cookies (secure & production-ready)
-
-Authenticated Socket.io connections
-
-Clean separation of concerns and modular architecture
-
-📂 Backend Folder Structure (Simplified)
-src/
-├── controllers/
-├── models/
-├── routes/
-├── middlewares/
-├── socket/
-├── config/
-├── app.ts
-└── server.ts
-
-▶️ Running the Project Locally
-Backend Setup
+# GigFlow
+
+A full-stack freelance marketplace built with the MERN stack. Users can post gigs, place bids, and hire freelancers — with real-time notifications powered by Socket.io.
+
+**Live Demo**
+- Frontend: _deploy to Vercel and update this link_
+- Backend: _deploy to Render and update this link_
+
+---
+
+## Features
+
+- **Authentication** — Register, login, and logout via JWT stored in HttpOnly cookies
+- **Gig Management** — Create, browse (infinite scroll), and view gig details
+- **Bidding System** — Place bids, prevent self-bidding, enforce one bid per freelancer per gig
+- **Safe Hiring** — Accept one bid; all remaining bids auto-rejected and gig marked closed
+- **Real-Time Notifications** — Socket.io events notify owners on new bids and freelancers on hire
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React (Vite), Tailwind CSS, Redux Toolkit, Axios, Socket.io Client |
+| Backend | Node.js, Express, TypeScript, Mongoose, Socket.io |
+| Database | MongoDB Atlas |
+| Deployment | Vercel (frontend) · Render (backend) |
+
+---
+
+## Project Structure
+
+```
+GIGFLOW/
+├── backend/
+│   └── src/
+│       ├── config/        # DB connection
+│       ├── controllers/   # Route handlers
+│       ├── middlewares/   # Auth, validation, error handling
+│       ├── models/        # Mongoose schemas
+│       ├── routes/        # Express routers
+│       ├── services/      # Business logic
+│       ├── socket/        # Socket.io setup
+│       ├── app.ts
+│       └── server.ts
+└── frontend/
+    └── src/
+        ├── components/    # Navbar, BidForm, NotificationDropdown
+        ├── lib/           # Axios instance
+        ├── pages/         # All page components
+        ├── socket/        # Socket.io client
+        └── store/         # Redux store & slices
+```
+
+---
+
+## Local Development
+
+### Backend
+
+```bash
 cd backend
 npm install
+# configure .env (see .env.example)
 npm run dev
+```
 
-Frontend Setup
+**`backend/.env`**
+```
+MONGODB_URL=your_mongodb_atlas_url
+PORT=3000
+JWT_SECRET_KEY=your_secret
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
+```
+
+### Frontend
+
+```bash
 cd frontend
 npm install
+# configure .env (see .env.example)
 npm run dev
+```
+
+**`frontend/.env`**
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
+```
+
+---
+
+## Deployment
+
+### Render (Backend)
+
+Set the following environment variables in your Render service dashboard:
+
+| Variable | Value |
+|---|---|
+| `MONGODB_URL` | Your MongoDB Atlas connection string |
+| `JWT_SECRET_KEY` | A strong random secret |
+| `CLIENT_URL` | Your Vercel frontend URL |
+| `NODE_ENV` | `production` |
+| `PORT` | `3000` (Render sets this automatically) |
+
+### Vercel (Frontend)
+
+Set the following environment variables in your Vercel project settings:
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | `https://your-backend.onrender.com/api` |
+| `VITE_SOCKET_URL` | `https://your-backend.onrender.com` |
+
+> **Note:** Both variables must be prefixed with `VITE_` to be exposed to the Vite build.
+
+---
+
+## Authentication Notes
+
+Authentication uses HttpOnly cookies. For proper API testing, use the deployed frontend or Postman with cookie support enabled.

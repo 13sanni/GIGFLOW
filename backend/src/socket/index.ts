@@ -12,7 +12,6 @@ export const initSocket = (io: Server) => {
       const rawCookie = socket.handshake.headers.cookie;
 
       if (!rawCookie) {
-        console.log("No cookie, disconnecting socket");
         socket.disconnect();
         return;
       }
@@ -21,7 +20,6 @@ export const initSocket = (io: Server) => {
       const token = parsedCookies.token;
 
       if (!token) {
-        console.log("No token cookie, disconnecting socket");
         socket.disconnect();
         return;
       }
@@ -34,17 +32,9 @@ export const initSocket = (io: Server) => {
       const roomName = `user:${decoded.userId}`;
       socket.join(roomName);
 
-      console.log(
-        `Socket connected: ${socket.id}, user: ${decoded.userId}`
-      );
-
-      socket.on("disconnect", () => {
-        console.log(
-          `Socket disconnected: ${socket.id}, user: ${decoded.userId}`
-        );
-      });
+      socket.on("disconnect", () => { });
     } catch (err) {
-      console.log("Socket auth failed");
+      console.error("Socket auth failed");
       socket.disconnect();
     }
   });

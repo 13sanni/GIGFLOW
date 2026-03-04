@@ -24,7 +24,6 @@ const GigDetail = () => {
         setGig(gigRes.data.gig);
         setUserId(meRes.data.user.userId);
 
-        // OWNER → fetch bids
         if (gigRes.data.gig.owner === meRes.data.user.userId) {
           const bidsRes = await api.get(`/bid/gig/${id}`);
           setBids(bidsRes.data.bids);
@@ -102,11 +101,10 @@ const GigDetail = () => {
                 ₹ {gig.budget}
               </p>
               <span
-                className={`inline-block mt-3 text-xs px-3 py-1.5 rounded-full font-medium ${
-                  gig.status === "open"
+                className={`inline-block mt-3 text-xs px-3 py-1.5 rounded-full font-medium ${gig.status === "open"
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-slate-100 text-slate-600"
-                }`}
+                  }`}
               >
                 {gig.status}
               </span>

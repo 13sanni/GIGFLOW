@@ -25,9 +25,7 @@ const NotificationDropdown = ({ onClose }) => {
     if (!notification.isRead) {
       try {
         await api.patch(`/notifications/${notification.id}/read`);
-      } catch {
-        // Keep navigation usable even if read-state update fails.
-      }
+      } catch { }
 
       dispatch(markNotificationRead(notification.id));
     }
@@ -59,9 +57,8 @@ const NotificationDropdown = ({ onClose }) => {
             onClick={() => handleNotificationClick(notification)}
             className={`w-full text-left px-4 py-3 text-sm
                        hover:bg-sky-50 transition-colors
-                       border-b border-sky-100 last:border-b-0 ${
-                         notification.isRead ? "bg-white/70" : "bg-sky-50/70"
-                       }`}
+                       border-b border-sky-100 last:border-b-0 ${notification.isRead ? "bg-white/70" : "bg-sky-50/70"
+              }`}
           >
             <p className="text-slate-800">{notification.message}</p>
             <p className="mt-1 text-xs text-slate-500">

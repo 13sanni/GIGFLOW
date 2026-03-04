@@ -8,6 +8,6 @@ export const validate =
         schema.parse(req.body);
         next();
       } catch (err: any) {
-        next(err); // ✅ Pass to global errorHandler which handles ZodErrors
+        next(err);
       }
     };

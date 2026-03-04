@@ -1,8 +1,8 @@
 import dns from "dns";
-dns.setServers(["8.8.8.8", "1.1.1.1"]); // ✅ Bypass broken system DNS — fixes mongodb+srv:// SRV lookups
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 import dotenv from "dotenv";
-dotenv.config(); // ✅ Must be first — loads .env before any module reads process.env
+dotenv.config();
 
 import http from "http";
 import { Server } from "socket.io";
@@ -13,12 +13,15 @@ import { setIO } from "./socket/socketStore.js";
 
 const server = http.createServer(app);
 
+const clientUrl = process.env.CLIENT_URL;
+const socketOrigins: string[] = [
+  "http://localhost:5173",
+  ...(clientUrl ? [clientUrl] : []),
+];
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://gigflow-beta-ruby.vercel.app",
-    ],
+    origin: socketOrigins,
     credentials: true,
   },
 });
@@ -28,7 +31,6 @@ initSocket(io);
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ Connect to DB FIRST, then start listening — prevents requests before DB is ready
 connectDB().then(() => {
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
