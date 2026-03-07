@@ -3,8 +3,8 @@
 A full-stack freelance marketplace built with the MERN stack. Users can post gigs, place bids, and hire freelancers — with real-time notifications powered by Socket.io.
 
 **Live Demo**
-- Frontend: _deploy to Vercel and update this link_
-- Backend: _deploy to Render and update this link_
+- Frontend:https://gigflow-azure.vercel.app
+- Backend:https://gigflow-kua6.onrender.com
 
 ---
 
